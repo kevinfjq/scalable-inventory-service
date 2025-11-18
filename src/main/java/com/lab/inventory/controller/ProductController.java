@@ -31,7 +31,7 @@ public class ProductController {
     public ResponseEntity<Void> createProduct(@RequestBody CreateProductRequestDTO requestDTO) {
         Long newId = productService.createProduct(requestDTO);
 
-        return ResponseEntity.created(URI.create("/products/"+newId)).build();
+        return ResponseEntity.created(URI.create("/products/" + newId)).build();
     }
 
     @GetMapping("/{id}")

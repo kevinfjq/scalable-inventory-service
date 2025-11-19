@@ -1,6 +1,7 @@
 package com.lab.inventory.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lab.inventory.dto.CreateProductRequestDTO;
@@ -42,5 +43,12 @@ public class ProductController {
         } 
         return ResponseEntity.notFound().build();
     }
+
+    @PostMapping("/{id}/buy")
+    public ResponseEntity<String> buyProduct(@PathVariable Long id, @RequestParam int quantity) {
+        productService.buyProduct(id, quantity);
+        return ResponseEntity.ok("Purchase successful");
+    }
+    
     
 }

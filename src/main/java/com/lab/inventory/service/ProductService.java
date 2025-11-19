@@ -91,7 +91,7 @@ public class ProductService {
 
                     if(product.getStock() >= quantity) {
                         product.setStock(product.getStock() - quantity);
-                        productRepository.save(product);
+                        productRepository.saveAndFlush(product);
 
                         redissonClient.getBucket("product:"+id).delete();
 

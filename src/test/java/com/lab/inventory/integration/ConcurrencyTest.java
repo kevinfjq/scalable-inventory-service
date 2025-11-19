@@ -25,7 +25,7 @@ public class ConcurrencyTest {
     private ProductRepository productRepository;
 
     @Test
-    public void testRaceCondition_WhenBuyingProduct_WithoutLock() throws InterruptedException {
+    public void testRaceCondition_WhenBuyingProduct_WithDistributedLock() throws InterruptedException {
         Product product = Product.builder()
                 .name("PS5")
                 .price(BigDecimal.valueOf(2800))

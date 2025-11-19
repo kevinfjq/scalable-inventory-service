@@ -2,8 +2,10 @@ package com.lab.inventory.service;
 
 import java.time.Duration;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import org.redisson.api.RBucket;
+import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,6 +71,37 @@ public class ProductService {
         }
 
         return dbProductOpt;
-        
+    }
+
+    public void buyProduct(Long id, Integer quantity) {
+        String lockKey = "lock:product:" + id;
+        RLock lock = redissonClient.getLock(lockKey);
+
+        try {
+            boolean acquired = lock.tryLock(5, 10, TimeUnit.SECONDS);
+            if(acquired) {
+                try {
+                    Product product = productRepository.findById(id)
+                            .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+
+                    if(product.getStock() >= quantity) {
+                        product.setStock(product.getStock() - quantity);
+                        productRepository.save(product);
+
+                        System.out.println("Purchase complete by: " + Thread.currentThread().getName());
+                        System.out.println("Product id " + id + " purchased, quantity: " + quantity);
+                    } else {
+                        throw new RuntimeException("Insufficient stock for product id: " + id);
+                    } 
+                } finally {
+                    lock.unlock();
+                }
+            } else {
+                throw new RuntimeException("Could not complete purchase");
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Error while trying to get lock", e);
+        }
     }
 }
